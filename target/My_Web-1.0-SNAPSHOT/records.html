@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>购买记录</title>
+    <link type="text/css" rel="stylesheet" href="css/materialize.css">
+    <link type="text/css" rel="stylesheet" href="css/dialog.css">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified JavaScript -->
+
+    <script src="js/materialize.js"></script>
+    <script src="js/axios.js"></script>
+    <script src="js/vue.js"></script>
+</head>
+<body>
+
+<div id="yiyue">
+    <!--导航栏-->
+    <!-- 导航栏 -->
+    <nav class="hoverable mynav" id="nav">
+        <div class="nav-wrapper container ">
+            <span class="brand-logo "><i class="material-icons left">color_lens</i>Yiyue</span>
+            <ul class="right">
+                <li><a href="#" @click="toCart"><i class="material-icons left">add_shopping_cart</i><span
+                        class="new badge red lighten-5" style="color:#ef5350">{{cartnum}}</span></a></li>
+                <li><a href=""><i class="material-icons left">person</i>{{username}}</a></li>
+                <li><a href="#" @click="turnback"><i class="material-icons">arrow_back</i></a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="col s3" style="height: 60px;line-height: 80px;font-size: 30px;margin-left:10%;margin-bottom:5%">
+        <span class="title" style="color:#ad1457;font-weight: bold;font-size:130%">购买记录</span>
+    </div>
+    <!--商品表格-->
+    <div style="margin-left:5%;margin-right:5%;margin-bottom:3%">
+        <table class="striped centered" style="table-layout: fixed">
+            <thead>
+            <tr>
+                <th style="width: 60px">品牌名</th>
+                <th style="width: 80px">商品名</th>
+                <th style="width: 40px">规格</th>
+                <th style="width: 40px">单价</th>
+                <th style="width: 40px">数量</th>
+                <th style="width: 80px">购买日期</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="good in goods">
+                <td>{{good.brandName}}</td>
+                <td>{{good.goodName}}</td>
+                <td>{{good.specification}}</td>
+                <td>{{good.price}}</td>
+                <td>{{good.num}}</td>
+                <td>{{good.date}}</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+</div>
+
+<script>
+
+    new Vue({
+        el:"#yiyue",
+        data() {
+            return {
+                username:'',
+                cartnum:'',
+
+                /*------购物车中商品信息----------*/
+                /*查询返回的商品数据列表*/
+                goods:[],
+
+            }
+        },
+        created(){
+            this.getCartNum();
+            this.getUserName();
+            this.selectAll();
+        },
+        methods:{
+            /*------------------业务功能------------------*/
+            //查询所有商品
+            selectAll(){
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/cart/showrecords"
+                }).then(function (resp){
+                    _this.goods = resp.data;
+                })
+            },
+
+
+            /*获取购物车数量*/
+            getCartNum(){
+                /*---------获取购物车数量---------*/
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/cart/selectCount"
+                }).then(function (resp){
+                    _this.cartnum = resp.data;
+                })
+            },
+
+            getUserName(){
+                var _this = this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/getUserServlet"
+                }).then(function (resp){
+                    _this.username = resp.data;
+                })
+            },
+            /*------------------链接跳转-------------------*/
+            turnback(){
+                window.location.href='http://localhost:8080/My_Web_war/myIndex.html'
+            },
+            toCart(){
+                window.location.href='http://localhost:8080/My_Web_war/cart.html'
+            }
+        }
+    })
+</script>
+
+
+</body>
+</html>

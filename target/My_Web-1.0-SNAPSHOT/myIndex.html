@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪跃商城</title>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.css" media="screen,projection"/>
+    <link type="text/css" rel="stylesheet" href="css/myStyle.css">
+    <link type="text/css" rel="stylesheet" href="css/dialog.css">
+    <script src="js/vue.js"></script>
+    <script src="js/axios.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
+
+</head>
+
+<body>
+<div id="yiyue">
+    <!-- 导航栏 -->
+    <nav class="hoverable mynav" id="nav">
+        <div class="nav-wrapper container ">
+            <span class="brand-logo "><i class="material-icons left">color_lens</i>Yiyue</span>
+            <ul class="right">
+                <li><a href="#" @click="toCart"><i class="material-icons left">add_shopping_cart</i><span
+                        class="new badge red lighten-5" style="color:#ef5350">{{cartnum}}</span></a></li>
+                <li><a href="#" @click="loginOut"><i class="material-icons left">person</i>{{username}}</a></li>
+                <li><a href="#" @click="toRecords"><i class="material-icons" >library_books</i></a></li>
+                <li><a href="#" @click="toRoot"><i class="material-icons" >more_vert</i></a></li>
+            </ul>
+        </div>
+    </nav>
+    <!--字、搜索框-->
+    <div class="row" style="margin-left:16%">
+        <div class="col s3" style="height: 60px;line-height: 80px;font-size: 18px;">
+            <span class="title" style="color:#ad1457;font-weight: bold;font-size:130%">Here's girls' heaven!</span>
+        </div>
+        <div class="input-field col s2">
+            <select style="display: inline-block" v-model="brandName">
+                <option value="">所有品牌</option>
+                <option v-for="brand in brands">{{brand}}</option>
+            </select>
+        </div>
+        <div class="valign-wrapper col s4" id="search_box">
+            <i class="material-icons">search</i>
+            <div class="input-field">
+                <input id="good_inline" type="text" class="validate" v-model="searchgood.goodName">
+                <label for="good_inline">商品名</label>
+            </div>
+            <a class="waves-effect waves-light pink accent-1 btn" style="margin-left:3%" @click="selectByCondition">查询</a>
+        </div>
+    </div>
+    <!-- 展示界面 -->
+    <div class="container" id="show_window">
+        <div class="row">
+            <div class="col s3" v-for="good in goods">
+                <div class="card hoverable waves-effect waves-light col" style="width: 100%">
+                    <div class="card-image" @click="showDetail(good)">
+                        <img :src="'imgs/'+(good.id)+'.jpg'" height="230" width="230"/>
+                    </div>
+                    <div class="card-content">
+                        <p style="font-weight: bold">{{good.brandName}}</p>
+                        <p style="white-space: nowrap; overflow:hidden;word-break:break-all;text-overflow: ellipsis">
+                            {{good.goodName}}</p>
+                    </div>
+                    <div class="card-action" @click="addToCart(good.id)">
+                        <span class="right orange-text text-darken-4" style="font-weight: bolder">￥{{good.price}}</span>
+                        <a>加入购物车</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--分页框-->
+
+
+    <div class="dialog indigo lighten-5" v-show="outVisible" style="z-index: 100">
+        <p class="header">是否注销？</p>
+        <div class="row">
+            <button class="waves-effect waves-light btn" @click="cancelOut">取消</button>&nbsp;
+            <button class="waves-effect waves-light btn" @click="doOut">确认</button>
+        </div>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#yiyue',
+        data: {
+            outVisible:false,
+
+
+
+            username:'',
+            cartnum: '',
+            goods: [],
+            brands:[],
+
+            /*-----------------业务逻辑--------------------*/
+            /*选择加入购物车的商品*/
+            cartgood:{
+                userid:'',
+                goodid:'',
+            },
+
+            /*选择的品牌名*/
+            brandName:'',
+            /*搜索表单名*/
+            searchgood: {
+                brandName:'',
+                goodName:'',
+                price:'',
+                specification:'',
+                description:''
+            },
+        },
+        created() {
+            this.getUserName()
+            this.getCartNum();
+            this.selectAll()
+            this.selectBrands()
+        },
+        methods: {
+            /*---------------------------------获取信息-----------------------------------*/
+            /*初始化数据*/
+            getUserName(){
+                var _this = this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/user/getUser"
+                }).then(function (resp){
+                    _this.username = resp.data;
+                })
+            },
+            /*获取购物车数量*/
+            getCartNum(){
+                /*---------获取购物车数量---------*/
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/cart/selectCount"
+                }).then(function (resp){
+                    _this.cartnum = resp.data;
+                })
+            },
+
+
+            /*---------------------------------业务功能-----------------------------------*/
+            /*查询所有品牌*/
+            selectBrands(){
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/good/selectBrands"
+                }).then(function (resp){
+                    _this.brands = resp.data;
+                })
+            },
+            //查询所有商品
+            selectAll(){
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/good/selectAll"
+                }).then(function (resp){
+                    _this.goods = resp.data;
+                })
+            },
+            //条件查询
+            selectByCondition(){
+                //查询的商品数据
+                this.searchgood.brandName = this.brandName;
+                var _this= this;
+                axios({
+                    method:"post",
+                    url:"http://localhost:8080/My_Web_war/good/selectByConditions",
+                    data:_this.searchgood
+                }).then(function (resp){
+                    _this.goods = resp.data;
+                })
+            },
+
+            /*查看商品详情*/
+            showDetail(selectgood){
+                sessionStorage.setItem('selectgood', JSON.stringify(selectgood));
+                window.location.href = 'http://localhost:8080/My_Web_war/showgood.html'
+            },
+
+            /*加入购物车*/
+            addToCart(id){
+                this.cartgood.goodid=id;
+                console.log(this.cartgood)
+                var _this=this;
+                axios({
+                    method:"post",
+                    url:"http://localhost:8080/My_Web_war/cart/addToCart",
+                    data:_this.cartgood
+                }).then(function (resp){
+                    if(resp.data ==="success")
+                        alert("添加成功！");
+                    _this.getCartNum();
+                })
+            },
+
+
+            /*---------------------------------链接跳转---------------------------------*/
+            toCart(){
+                window.location.href="http://localhost:8080/My_Web_war/cart.html"
+            },
+            toRecords(){
+                window.location.href='http://localhost:8080/My_Web_war/records.html'
+            },
+            toRoot(){
+                if(this.username === "仪儿")
+                    window.location.href='http://localhost:8080/My_Web_war/root.html'
+                else
+                    alert("没有更多...")
+            },
+
+
+            loginOut(){
+               this.outVisible = !this.outVisible;
+                console.log(this.outVisible)
+            },
+            cancelOut(){
+                this.outVisible = !this.outVisible
+            },
+            doOut(){
+                var _this=this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/user/outUser",
+                }).then(function (resp){
+                    if(resp.data==="success") {
+
+                        alert("会话已过期，请重新登陆");
+                        window.location.href = 'http://localhost:8080/My_Web_war/loginRegister.html';
+                    }
+
+                })
+            }
+
+
+        }
+    })
+
+
+</script>
+</body>

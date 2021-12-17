@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品详情</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="./css/materialize.css" media="screen,projection" />
+    <link type="text/css" rel="stylesheet" href="./css/myStyle.css">
+    <script src="./js/vue.js"></script>
+    <script src="js/axios.js"></script>
+    <script type="text/javascript" src="./js/materialize.min.js"></script>
+</head>
+
+<body>
+    <div id="yiyue">
+        <nav class="hoverable mynav" id="nav">
+            <div class="nav-wrapper container ">
+                <span class="brand-logo "><i class="material-icons left">color_lens</i>Yiyue</span>
+                <ul class="right">
+                    <li><a href="#" @click="toCart"><i class="material-icons left">add_shopping_cart</i><span
+                            class="new badge red lighten-5" style="color:#ef5350">{{cartnum}}</span></a></li>
+                    <li><a href="#"><i class="material-icons left">person</i>{{username}}</a></li>
+                    <li><a href="#" @click="turnback"><i class="material-icons" >arrow_back</i></a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row">
+                <!-- 商品展示图片 -->
+                <div class="col s7">
+                    <h3 style="color: #5d4037;">{{good.goodName}}</h3>
+                    <div class="card hoverable waves-effect waves-block waves-light col s9 offset-s1">
+                        <div class="card-image">
+                            <img :src="'imgs/'+(good.id)+'.jpg'">
+                        </div>
+                        <div class="card-content">
+                            <span class="card-title activator orange-text text-darken-4">￥{{good.price}}<i
+                                    class="material-icons right">more_vert</i></span>
+                            <p><a href="#" @click="addToCart(good.id)">加入购物车</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 详细信息 -->
+                <div class="col s4 right">
+                    <br>
+                    <div class="card-panel hoverable" style="min-height: 750px;background-color: #fff8e1;">
+                        <h6>DETAILS</h6>
+                        <hr>
+                        <div class="detail_title" style="width: 100%;"><i class="tiny material-icons"
+                                style="width: 20px;">filter_vintage</i>商品名</div>
+                        <div class="detail_content">{{good.goodName}}</div>
+                        <hr>
+                        <div class="detail_title" style="width: 100%;"><i class="tiny material-icons"
+                                style="width: 20px;">attach_money</i>售价</div>
+                        <div class="detail_content">￥{{good.price}}</div>
+                        <hr>
+                        <div class="detail_title" style="width: 100%;"><i class="tiny material-icons"
+                                style="width: 20px;">add_location</i>品牌</div>
+                        <div class="detail_content">{{good.brandName}}</div>
+                        <hr>
+                        <div class="detail_title" style="width: 100%;"><i class="tiny material-icons"
+                                style="width: 20px;">account_balance</i>产品规格</div>
+                        <div class="detail_content">{{good.specification}}</div>
+                        <hr>
+                        <div class="detail_title"><i class="tiny material-icons"
+                                style="width: 20px;">insert_link</i>详细信息
+                        </div>
+                        <div id="game_descripe">{{good.description}}</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        new Vue({
+            el: '#yiyue',
+            data: {
+                /*导航栏信息*/
+                username: '',
+                cartnum: '',
+
+                /*展示的商品细节*/
+                good: {
+                    id:'',
+                    brandName:'',
+                    goodName:'',
+                    price:'',
+                    specification:'',
+                    description:''
+                },
+
+                /*选择加入购物车的商品*/
+                cartgood:{
+                    userid:'',
+                    goodid:'',
+                },
+            },
+            created() {
+                this.getUserName()
+                this.getCartNum()
+            },
+            methods: {
+                /*---------------------------------获取信息-----------------------------------*/
+                getUserName(){
+                    this.good=JSON.parse(sessionStorage.getItem('selectgood'))
+                    var _this = this;
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/My_Web_war/user/getUser"
+                    }).then(function (resp){
+                        _this.username = resp.data;
+                    })
+                },
+                /*获取购物车数量*/
+                getCartNum(){
+                    var _this= this;
+                    axios({
+                        method:"get",
+                        url:"http://localhost:8080/My_Web_war/cart/selectCount"
+                    }).then(function (resp){
+                        _this.cartnum = resp.data;
+                    })
+                },
+
+
+                /*---------------------------------业务功能-----------------------------------*/
+                addToCart(id){
+                    this.cartgood.goodid=id;
+                    console.log(this.cartgood)
+                    var _this=this;
+                    axios({
+                        method:"post",
+                        url:"http://localhost:8080/My_Web_war/cart/addToCart",
+                        data:_this.cartgood
+                    }).then(function (resp){
+                        if(resp.data ==="success")
+                            alert("添加成功！");
+                        _this.getCartNum();
+                    })
+                },
+                click_more() {
+                    alert('there are nothing more');
+                },
+
+                /*---------------------------------链接跳转---------------------------------*/
+                turnback(){
+                    window.location.href='http://localhost:8080/My_Web_war/myIndex.html'
+                },
+                toCart(){
+                    window.location.href="http://localhost:8080/My_Web_war/cart.html"
+                }
+            },
+        })
+    </script>
+</body>
+
+</html>

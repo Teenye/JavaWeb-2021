@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车</title>
+    <link type="text/css" rel="stylesheet" href="css/materialize.css">
+    <link type="text/css" rel="stylesheet" href="css/dialog.css">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="css/myStyle.css">
+    <!-- Compiled and minified JavaScript -->
+
+    <script src="js/materialize.js"></script>
+    <script src="js/axios.js"></script>
+    <script src="js/vue.js"></script>
+</head>
+<body>
+
+<div id="yiyue">
+    <!-- 导航栏 -->
+    <nav class="hoverable mynav" id="nav">
+        <div class="nav-wrapper container ">
+            <span class="brand-logo "><i class="material-icons left">color_lens</i>Yiyue</span>
+            <ul class="right">
+                <li><a href=""><i class="material-icons left">add_shopping_cart</i><span
+                        class="new badge red lighten-5" style="color:#ef5350">{{cartnum}}</span></a></li>
+                <li><a href=""><i class="material-icons left">person</i>{{username}}</a></li>
+                <li><a href="#" @click="turnback"><i class="material-icons">arrow_back</i></a></li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="col s3" style="height: 60px;line-height: 80px;font-size: 30px;margin-left:10%">
+        <span class="title" style="color:#ad1457;font-weight: bold;font-size:130%">购物车</span>
+    </div>
+    <!--表格-->
+    <div style="margin-left:10%;margin-right:10%;margin-top:3%">
+        <table class="highlight centered" style="table-layout: fixed;border-radius:13px">
+            <thead style="background-color:#ef9a9a">
+            <tr>
+                <th style="width: 80px">商品名</th>
+                <th style="height:100px;width: 100px">商品图片</th>
+                <th style="width: 40px">规格</th>
+                <th style="width: 40px">单价</th>
+                <th style="width: 40px">数量</th>
+                <th style="width: 80px">操作</th>
+            </tr>
+            </thead>
+            <tbody style="background-color: #fce4ec">
+            <tr v-for="good in goods">
+                <td>{{good.brandName}}<br>{{good.goodName}}</td>
+                <td><img :src="'imgs/'+(good.id)+'.jpg'" style="height:60%;width:60%"></td>
+                <td>{{good.specification}}</td>
+                <td style="font-weight: bolder;color: #e65100">{{good.price}}</td>
+                <td style="font-weight: bolder">{{good.num}}</td>
+                <td><a class="waves-effect waves-light btn" @click="pay(good)">购买</a>&nbsp;<a class="waves-effect waves-light btn deep-orange lighten-1" @click="del(good.id)">减一</a>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+</div>
+
+<script>
+
+    new Vue({
+        el:"#yiyue",
+        data() {
+            return {
+                /*--------导航栏信息-----------*/
+                /*用户名*/
+                username:'',
+                /*购物车里的数量*/
+                cartnum:'',
+
+                /*------购物车中商品信息----------*/
+                /*查询返回的商品数据列表*/
+                goods:[],
+
+                /*------操作的商品信息-----------*/
+                cartgood:{
+                    userid:'',
+                    goodid:'',
+                    num:'',
+                    date:'',
+                },
+            }
+        },
+        created(){
+            this.getUserName();
+            this.getCartNum();
+            this.selectAll();
+        },
+        methods:{
+            /*-------------------获取信息-------------------*/
+            /*初始化得到用户信息*/
+            getUserName(){
+                var _this = this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/user/getUser"
+                }).then(function (resp){
+                    _this.username = resp.data;
+                })
+            },
+            /*获取购物车数量*/
+            getCartNum(){
+                /*---------获取购物车数量---------*/
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/cart/selectCount"
+                }).then(function (resp){
+                    _this.cartnum = resp.data;
+                })
+            },
+
+            /*------------------业务功能------------------*/
+            //查询所有商品
+            selectAll(){
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/cart/selectCart"
+                }).then(function (resp){
+                    _this.goods = resp.data;
+                })
+            },
+            /*提交删除物品*/
+            del(id) {
+                this.cartgood.goodid=id;
+                var _this = this;
+                // 发送ajax请求，添加数据
+                axios({
+                    method:"post",
+                    url:"http://localhost:8080/My_Web_war/cart/del",
+                    data:_this.cartgood
+                }).then(function (resp) {
+                    if(resp.data === "success") {
+                        // 重新查询数据
+                        _this.getCartNum();
+                        _this.selectAll();
+                    }
+                })
+            },
+            /*购买商品*/
+            pay(good){
+                this.cartgood.goodid=good.id;
+                this.cartgood.num=good.num;
+                var _this = this;
+                // 发送ajax请求，添加数据
+                axios({
+                    method:"post",
+                    url:"http://localhost:8080/My_Web_war/cart/buy",
+                    data:_this.cartgood
+                }).then(function (resp) {
+                    if(resp.data === "success") {
+                        alert("购买成功");
+                        _this.getCartNum();
+                        _this.selectAll();
+                    }
+                })
+            },
+
+            /*------------------链接跳转-------------------*/
+            turnback(){
+                window.location.href='http://localhost:8080/My_Web_war/myIndex.html'
+            },
+
+
+
+
+        }
+    })
+</script>
+
+
+</body>
+</html>

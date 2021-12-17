@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>销售日志</title>
+    <link type="text/css" rel="stylesheet" href="css/materialize.css">
+    <link type="text/css" rel="stylesheet" href="css/dialog.css">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified JavaScript -->
+
+    <script src="js/materialize.js"></script>
+    <script src="js/axios.js"></script>
+    <script src="js/vue.js"></script>
+</head>
+<body>
+
+<div id="yiyue">
+    <!--导航栏-->
+    <nav>
+        <div class="nav-wrapper">
+            <a href="" class="brand-logo"><i class="material-icons">cloud</i>销售日志</a>
+            <ul class="right hide-on-med-and-down">
+                <li><a href="root.html" style="font-weight: bolder">管理商品界面</a></li>
+                <li><a href="rootuser.html" style="font-weight: bolder">管理用户界面</a></li>
+                <li><a href="myIndex.html" style="font-weight: bolder">返回商城</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!---------------------搜索---------------------------->
+
+    <!--商品表格-->
+    <div style="margin-top:3%">
+        <table class="striped centered" style="table-layout: fixed">
+            <thead>
+            <tr>
+                <th style="width: 60px">用户名</th>
+                <th style="width: 60px">品牌名</th>
+                <th style="width: 80px">商品名</th>
+                <th style="width: 40px">规格</th>
+                <th style="width: 40px">单价</th>
+                <th style="width: 40px">数量</th>
+                <th style="width: 80px">购买日期</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="good in goods">
+                <td>{{good.userName}}</td>
+                <td>{{good.brandName}}</td>
+                <td>{{good.goodName}}</td>
+                <td>{{good.specification}}</td>
+                <td>{{good.price}}</td>
+                <td>{{good.num}}</td>
+                <td>{{good.date}}</td>
+            </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+
+
+
+
+</div>
+
+<script>
+
+    new Vue({
+        el:"#yiyue",
+        data() {
+            return {
+                /*------购物车中商品信息----------*/
+                /*查询返回的商品数据列表*/
+                goods:[],
+
+            }
+        },
+        created(){
+            this.selectAll();
+        },
+        methods:{
+            /*------------------业务功能------------------*/
+            //查询所有商品
+            selectAll(){
+                var _this= this;
+                axios({
+                    method:"get",
+                    url:"http://localhost:8080/My_Web_war/cart/showtable"
+                }).then(function (resp){
+                    _this.goods = resp.data;
+                })
+            },
+
+            /*------------------链接跳转-------------------*/
+            turnback(){
+                window.location.href='http://localhost:8080/My_Web_war/myIndex.html'
+            },
+
+
+
+
+        }
+    })
+</script>
+
+
+</body>
+</html>

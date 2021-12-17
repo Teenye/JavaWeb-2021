@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>仪跃商城</title>
+    <link type="text/css" rel="stylesheet" href="css/loginRegister.css">
+    <script src="js/axios.js"></script>
+    <script src="js/vue.js"></script>
+</head>
+
+<body>
+
+<div id="title" style="float:left;margin-left:13%;margin-top: 11%">
+  <div style="font-size:45px;color: #009688 ;">仪跃商城</div>
+  <div style="color: #ff5252 ;margin-top: 20px;text-align: center;">-打造女性的天堂-</div>
+</div>
+
+<div class="login-wrap" id="loginRegister" style="margin-top:20px;margin-right: 10%;opacity: 0.9">
+  <div class="login-html">
+    <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab" style="letter-spacing: 8px">登陆</label>
+    <input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab" style="letter-spacing: 8px">注册</label>
+    <div class="login-form">
+      <div class="sign-in-htm">
+        <div class="group" style="margin-top:30px">
+          <label for="user_login" class="label" style="font-size:14px;letter-spacing: 3px">用户名</label>
+          <input id="user_login" type="text" class="input" v-model="login_user.username">
+        </div>
+        <div class="group" style="margin-top:30px">
+          <label for="pass_login" class="label" style="font-size:14px;letter-spacing: 3px">密码</label>
+          <input id="pass_login" type="password" class="input" data-type="password" v-model="login_user.password">
+        </div>
+
+        <div class="group" style="margin-top:40px">
+          <input type="submit" class="button" value="登陆" @click="login" style="font-size:20px;letter-spacing: 18px">
+        </div>
+        <div class="hr"></div>
+        <div class="foot-lnk">
+          <a href="#forgot" style="font-size:18px">忘记密码?</a>
+        </div>
+      </div>
+      <div class="sign-up-htm">
+        <div class="group" style="margin-top:15px">
+          <label for="user_register" class="label" style="font-size:14px;letter-spacing: 3px">用户名</label>
+          <input id="user_register" type="text" class="input" v-model="register_user.username">
+        </div>
+        <div class="group" style="margin-top:15px">
+          <label for="pass_register" class="label" style="font-size:14px;letter-spacing: 3px">密码</label>
+          <input id="pass_register" type="password" class="input" data-type="password" v-model="register_user.password">
+        </div>
+        <div class="group" style="margin-top:15px">
+          <label for="repass_register" class="label" style="font-size:14px;letter-spacing: 3px">重复密码</label>
+          <input id="repass_register" type="password" class="input" data-type="password" v-model="repassword">
+        </div>
+        <div class="group" style="margin-top:15px">
+          <label for="email_register" class="label" style="font-size:14px;letter-spacing: 3px">电子邮件</label>
+          <input id="email_register" type="text" class="input" v-model="register_user.email">
+        </div>
+        <div class="group" style="margin-top:18px">
+          <input type="submit" class="button" value="注册" @click="register" style="font-size:18px;letter-spacing: 15px">
+        </div>
+        <div class="hrr"></div>
+        <div class="foot-lnk">
+          <label for="tab-1">已经有账号?</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  new Vue({
+    el:"#loginRegister",
+    data() {
+      return {
+        /*-----------登陆-----------*/
+        /*用户名或者密码错误*/
+        msgerror:false,
+
+        loginmsg:"",
+
+        login_user:{
+          username:'',
+          password:'',
+        },
+
+        /*-----------注册-----------*/
+        /*两次输入密码不一致*/
+        nosame:false,
+        /*用户名已被注册*/
+        alreadyexist:false,
+        /*注册成功*/
+        registersuccess:false,
+
+        registermsg:"",
+
+        repassword:'',
+
+        register_user:{
+          username:'',
+          password:'',
+          email:'',
+        },
+
+      }
+    },
+    methods:{
+      login(){
+        var _this= this;
+        axios({
+          method:"post",
+          url:"http://localhost:8080/My_Web_war/user/login",
+          data:_this.login_user,
+        }).then(function (resp) {
+          _this.loginmsg = resp.data;
+          if(_this.loginmsg==="success") {
+            window.location.href = 'http://localhost:8080/My_Web_war/myIndex.html';
+          }
+          else{
+            console.log(_this.loginmsg)
+            alert("登陆失败！用户名或密码错误")
+          }
+        })
+      },
+
+      register() {
+        if (this.repassword !== this.register_user.password)
+          /* 密码不同提示框  */
+          //nosame = true;
+          alert("两次输入的密码不同！");
+        else {
+          nosame = false;
+          var _this = this;
+          axios({
+            method: "post",
+            url: "http://localhost:8080/My_Web_war/user/register",
+            data: _this.register_user,
+          }).then(function (resp) {
+            /*返回错误信息*/
+            _this.registermsg = resp.data;
+            if(_this.registermsg==="success")
+              alert("注册成功！")
+            else
+              alert("注册失败！用户名已存在")
+          })
+        }
+      },
+    }
+
+
+
+  })
+
+</script>
+</body>
+</html>
